@@ -429,7 +429,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             if start:
                 self.abbr_title = None
                 self.abbr_data = ''
-                if ('title' in attrs):
+                if 'title' in attrs:
                     self.abbr_title = attrs['title']
             else:
                 if self.abbr_title is not None:
@@ -444,11 +444,9 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.o(self.close_quote)
             self.quote = not self.quote
 
-        def link_url(self, link, title=""):
+        def link_url(self, link):
             url = urlparse.urljoin(self.baseurl, link)
-            title = ' "{0}"'.format(title) if title.strip() else ''
-            self.o(']({url}{title})'.format(url=escape_md(url),
-                                            title=title))
+            self.o(']({url})'.format(url=escape_md(url)))
 
         if tag == "a" and not self.ignore_links:
             if start:
@@ -478,9 +476,9 @@ class HTML2Text(HTMLParser.HTMLParser):
                                 title = a['title'] if a['title'] else ''
                                 title = escape_md(title)
                             except KeyError:
-                                link_url(self, a['href'], '')
+                                link_url(self, a['href'])
                             else:
-                                link_url(self, a['href'], title)
+                                link_url(self, a['href'])
                         else:
                             i = self.previousIndex(a)
                             if i is not None:
@@ -770,8 +768,6 @@ class HTML2Text(HTMLParser.HTMLParser):
                     if self.outcount > link['outcount']:
                         self.out("   [" + str(link['count']) + "]: " +
                                  urlparse.urljoin(self.baseurl, link['href']))
-                        if 'title' in link:
-                            self.out(" (" + link['title'] + ")")
                         self.out("\n")
                     else:
                         newa.append(link)

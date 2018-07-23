@@ -48,7 +48,7 @@ PAD_TABLES = False
 
 # Convert links with same href and text to <href> format
 # if they are absolute links
-USE_AUTOMATIC_LINKS = True
+USE_AUTOMATIC_LINKS = False
 
 # For checking space-only lines on line 771
 RE_SPACE = re.compile(r'\s\+')

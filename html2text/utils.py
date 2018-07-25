@@ -226,6 +226,7 @@ def escape_md(text):
     Escapes markdown-sensitive characters within other markdown
     constructs.
     """
+    text = text.replace('_', '\_')
     return config.RE_MD_CHARS_MATCHER.sub(r"\\\1", text)
 
 

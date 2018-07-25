@@ -226,7 +226,6 @@ def escape_md(text):
     Escapes markdown-sensitive characters within other markdown
     constructs.
     """
-    text = text.replace('_', '\_')
     return config.RE_MD_CHARS_MATCHER.sub(r"\\\1", text)
 
 
@@ -243,7 +242,7 @@ def escape_md_section(text, snob=False):
     text = config.RE_MD_PLUS_MATCHER.sub(r"\1\\\2", text)
     text = config.RE_MD_DASH_MATCHER.sub(r"\1\\\2", text)
 
-    return text
+    return text.replace(r'_', r'\_')
 
 
 def reformat_table(lines, right_margin):

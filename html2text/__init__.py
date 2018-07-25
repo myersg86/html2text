@@ -927,7 +927,6 @@ class HTML2Text(HTMLParser.HTMLParser):
                 res_split[i] += '*'
 
         result = '\n'.join(res_split)
-        result = result.replace('_', '\_')
 
         res_split = result.split("\n")
         insert_list = []

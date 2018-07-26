@@ -787,6 +787,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             self.outcount += 1
 
     def handle_data(self, data, entity_char=False):
+        href = ""
         if self.stressed:
             data = data.strip()
             self.stressed = False
@@ -815,7 +816,7 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.empty_link = False
 
         if not self.code and not self.pre and not entity_char:
-            data = escape_md_section(data, snob=self.escape_snob)
+            data = escape_md_section(data, snob=self.escape_snob, href=bool(href))
         self.preceding_data = data
         self.o(data, 1)
 

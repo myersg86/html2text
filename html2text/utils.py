@@ -229,7 +229,7 @@ def escape_md(text):
     return config.RE_MD_CHARS_MATCHER.sub(r"\\\1", text)
 
 
-def escape_md_section(text, snob=False):
+def escape_md_section(text, snob=False, href=False):
     """
     Escapes markdown-sensitive characters across whole document sections.
     """
@@ -238,11 +238,14 @@ def escape_md_section(text, snob=False):
     if snob:
         text = config.RE_MD_CHARS_MATCHER_ALL.sub(r"\\\1", text)
 
+    if not href:
+        text = text.replace(r'_', r'\_')
+
     text = config.RE_MD_DOT_MATCHER.sub(r"\1\\\2", text)
     text = config.RE_MD_PLUS_MATCHER.sub(r"\1\\\2", text)
     text = config.RE_MD_DASH_MATCHER.sub(r"\1\\\2", text)
 
-    return text.replace(r'_', r'\_')
+    return text
 
 
 def reformat_table(lines, right_margin):

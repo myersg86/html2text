@@ -196,9 +196,9 @@ def skipwrap(para, wrap_links):
     # If the text begins with a single -, *, or +, followed by a space,
     # or an integer, followed by a ., followed by a space (in either
     # case optionally proceeded by whitespace), it's a list; don't wrap.
-    if config.RE_ORDERED_LIST_MATCHER.match(stripped) or \
-            config.RE_UNORDERED_LIST_MATCHER.match(stripped):
-        return True
+    # if config.RE_ORDERED_LIST_MATCHER.match(stripped) or \
+    #         config.RE_UNORDERED_LIST_MATCHER.match(stripped):
+    #     return True
 
     return False
 
@@ -241,8 +241,8 @@ def escape_md_section(text, snob=False, href=False):
     if not href:
         text = text.replace(r'_', r'\_')
 
-    text = config.RE_MD_DOT_MATCHER.sub(r"\1\\\2", text)
-    text = config.RE_MD_PLUS_MATCHER.sub(r"\1\\\2", text)
+    # text = config.RE_MD_DOT_MATCHER.sub(r"\1\\\2", text)
+    # text = config.RE_MD_PLUS_MATCHER.sub(r"\1\\\2", text)
     text = config.RE_MD_DASH_MATCHER.sub(r"\1\\\2", text)
 
     return text

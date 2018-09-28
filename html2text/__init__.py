@@ -211,7 +211,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             if 'href' in a and a['href'] == attrs['href']:
                 if 'title' in a or 'title' in attrs:
                     if 'title' in a and \
-                        'title' in attrs and \
+                            'title' in attrs and \
                             a['title'] == attrs['title']:
                         match = True
                 else:
@@ -349,10 +349,7 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.p()
 
         if tag == "br" and start:
-            if self.blockquote > 0:
-                self.o("  \n> ")
-            else:
-                self.o("  \n")
+            self.o("  \n")
 
         if tag == "hr" and start:
             self.p()
@@ -377,7 +374,7 @@ class HTML2Text(HTMLParser.HTMLParser):
         if tag == "blockquote":
             if start:
                 self.p()
-                self.o('> ', 0, 1)
+                self.o('| ', 0, 1)
                 self.start = 1
                 self.blockquote += 1
             else:
@@ -431,7 +428,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             if start:
                 self.abbr_title = None
                 self.abbr_data = ''
-                if ('title' in attrs):
+                if 'title' in attrs:
                     self.abbr_title = attrs['title']
             else:
                 if self.abbr_title is not None:
@@ -446,18 +443,16 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.o(self.close_quote)
             self.quote = not self.quote
 
-        def link_url(self, link, title=""):
+        def link_url(self, link):
             url = urlparse.urljoin(self.baseurl, link)
-            title = ' "{0}"'.format(title) if title.strip() else ''
-            self.o(']({url}{title})'.format(url=escape_md(url),
-                                            title=title))
+            self.o(']({url})'.format(url=escape_md(url)))
 
         if tag == "a" and not self.ignore_links:
             if start:
                 if 'href' in attrs and \
-                    attrs['href'] is not None and not \
+                        attrs['href'] is not None and not \
                         (self.skip_internal_links and
-                            attrs['href'].startswith('#')):
+                         attrs['href'].startswith('#')):
                     self.astack.append(attrs)
                     self.maybe_automatic_link = attrs['href']
                     self.empty_link = True
@@ -480,9 +475,9 @@ class HTML2Text(HTMLParser.HTMLParser):
                                 title = a['title'] if a['title'] else ''
                                 title = escape_md(title)
                             except KeyError:
-                                link_url(self, a['href'], '')
+                                link_url(self, a['href'])
                             else:
-                                link_url(self, a['href'], title)
+                                link_url(self, a['href'])
                         else:
                             i = self.previousIndex(a)
                             if i is not None:
@@ -723,8 +718,8 @@ class HTML2Text(HTMLParser.HTMLParser):
                     self.out("\n[code]")
                     self.p_p = 0
 
-            bq = (">" * self.blockquote)
-            if not (force and data and data[0] == ">") and self.blockquote:
+            bq = ("| " * self.blockquote)
+            if not (force and data and data[0] == "|") and self.blockquote:
                 bq += " "
 
             if self.pre:
@@ -772,8 +767,6 @@ class HTML2Text(HTMLParser.HTMLParser):
                     if self.outcount > link['outcount']:
                         self.out("   [" + str(link['count']) + "]: " +
                                  urlparse.urljoin(self.baseurl, link['href']))
-                        if 'title' in link:
-                            self.out(" (" + link['title'] + ")")
                         self.out("\n")
                     else:
                         newa.append(link)
@@ -793,6 +786,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             self.outcount += 1
 
     def handle_data(self, data, entity_char=False):
+        href = ""
         if self.stressed:
             data = data.strip()
             self.stressed = False
@@ -820,6 +814,8 @@ class HTML2Text(HTMLParser.HTMLParser):
                 self.maybe_automatic_link = None
                 self.empty_link = False
 
+        if not self.code and not self.pre and not entity_char:
+            data = escape_md_section(data, snob=self.escape_snob, href=bool(href))
         self.preceding_data = data
         self.o(data, 1)
 
@@ -876,7 +872,7 @@ class HTML2Text(HTMLParser.HTMLParser):
         nest_count = 0
         if 'margin-left' in style:
             nest_count = int(style['margin-left'][:-2]) \
-                // self.google_list_indent
+                         // self.google_list_indent
 
         return nest_count
 
@@ -898,7 +894,7 @@ class HTML2Text(HTMLParser.HTMLParser):
         # To avoid the non-wrap behaviour for entire paras
         # because of the presence of a link in it
         if not self.wrap_links:
-            self.inline_links = False
+            self.inline_links = True
         for para in text.split("\n"):
             if len(para) > 0:
                 if not skipwrap(para, self.wrap_links):
@@ -923,7 +919,34 @@ class HTML2Text(HTMLParser.HTMLParser):
                 if newlines < 2:
                     result += "\n"
                     newlines += 1
-        return result
+
+        res_split = result.split("\n")
+        insert_list = []
+        for i in range(len(res_split)):
+            data = res_split[i].count('| ')
+            if res_split[i].strip() == "|":
+                data = 1
+
+            if not res_split[i]:
+                data = -1
+
+            insert_list.append(data)
+
+        assert len(insert_list), len(res_split)
+
+        # for i in range(len(res_split)):
+        #     print(res_split[i], insert_list[i])
+
+        for i in range(len(res_split)):
+            if i == 0 or i == len(res_split) - 1:
+                pass
+
+            if insert_list[i] == 0 or (insert_list[i] == -1 and (insert_list[i - 1] > 0 and insert_list[i + 1] > 0)):
+                prev = "| " * insert_list[i - 1]
+                res_split[i] = prev + res_split[i]
+                insert_list[i] = insert_list[i - 1]
+
+        return '\n'.join(res_split)
 
 
 def html2text(html, baseurl='', bodywidth=None):

@@ -37,7 +37,7 @@ except NameError:
     # python3 uses chr
     nochr = str('')
 
-__version__ = (2017, 12, 4)
+__version__ = (2018, 1, 9)
 
 
 # TODO:
@@ -88,6 +88,8 @@ class HTML2Text(HTMLParser.HTMLParser):
         self.pad_tables = config.PAD_TABLES  # covered in cli
         self.default_image_alt = config.DEFAULT_IMAGE_ALT  # covered in cli
         self.tag_callback = None
+        self.open_quote = config.OPEN_QUOTE  # covered in cli
+        self.close_quote = config.CLOSE_QUOTE  # covered in cli
 
         if out is None:  # pragma: no cover
             self.out = self.outtextf
@@ -113,6 +115,7 @@ class HTML2Text(HTMLParser.HTMLParser):
         self.pre = 0
         self.startpre = 0
         self.code = False
+        self.quote = False
         self.br_toggle = ''
         self.lastWasNL = 0
         self.lastWasList = False
@@ -420,9 +423,10 @@ class HTML2Text(HTMLParser.HTMLParser):
                 # handle some font attributes, but leave headers clean
                 self.handle_emphasis(start, tag_style, parent_style)
 
-        if tag in ["code", "tt"] and not self.pre:
+        if tag in ["kbd", "code", "tt"] and not self.pre:
             self.o('`')  # TODO: `` `this` ``
             self.code = not self.code
+
         if tag == "abbr":
             if start:
                 self.abbr_title = None
@@ -434,6 +438,13 @@ class HTML2Text(HTMLParser.HTMLParser):
                     self.abbr_list[self.abbr_data] = self.abbr_title
                     self.abbr_title = None
                 self.abbr_data = ''
+
+        if tag == "q":
+            if not self.quote:
+                self.o(self.open_quote)
+            else:
+                self.o(self.close_quote)
+            self.quote = not self.quote
 
         def link_url(self, link, title=""):
             url = urlparse.urljoin(self.baseurl, link)

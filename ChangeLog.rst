@@ -1,3 +1,12 @@
+2018.9.1
+========
+----
+
+* Fix #188: Non-ASCII in title attribute causes encode error.
+* Feature #194: Add support for the <kbd> tag.
+* Feature #193: Add support for the <q> tag.
+
+
 2017.10.4
 ==========
 ----
